@@ -40,9 +40,18 @@ public class TaskController {
         @PostMapping
         public ResponseEntity<TaskDTO> createTask(
                         @Parameter(description = "Task data to create", required = true) @Valid @RequestBody TaskDTO taskDTO) {
-                Optional<TaskDTO> createdTask = taskService.create(taskDTO);
-                return createdTask.map(value -> new ResponseEntity<>(value, HttpStatus.CREATED))
-                                .orElseGet(() -> new ResponseEntity<>(HttpStatus.BAD_REQUEST));
+
+                System.out.println("***************************************8");
+
+                try {
+
+                        Optional<TaskDTO> createdTask = taskService.create(taskDTO);
+                        return createdTask.map(value -> new ResponseEntity<>(value, HttpStatus.CREATED))
+                                        .orElseGet(() -> new ResponseEntity<>(HttpStatus.BAD_REQUEST));
+                } catch (Exception e) {
+                        System.out.println(e.getMessage());
+                        return null;
+                }
         }
 
         // Get all tasks

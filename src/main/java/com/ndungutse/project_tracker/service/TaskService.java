@@ -33,32 +33,41 @@ public class TaskService {
     // Create
     @Transactional
     public Optional<TaskDTO> create(TaskDTO taskDTO) {
-        // Validate that the project exists
-        if (taskDTO.getProjectId() == null || !projectService.exists(taskDTO.getProjectId())) {
+
+        try {
+
+            // Validate that the project exists
+            if (taskDTO.getProjectId() == null || !projectService.exists(taskDTO.getProjectId())) {
+                System.out.println(!projectService.exists(taskDTO.getProjectId()));
+                System.out.println("from service *************************8");
+                return Optional.empty();
+            }
+
+            // Get the project entity
+            Optional<Project> project = projectService.getById(taskDTO.getProjectId())
+                    .map(ProjectDTO::toEntity);
+
+            if (project.isEmpty()) {
+                return Optional.empty();
+            }
+
+            // Get the assigned user entity if provided
+            User assignedUser = null;
+            if (taskDTO.getAssignedUserId() != null) {
+                assignedUser = userService.getUserById(taskDTO.getAssignedUserId())
+                        .map(UserDTO::toEntity)
+                        .orElse(null);
+            }
+
+            // Create and save the task
+            Task task = taskDTO.toEntity(project.get(), assignedUser);
+            Task savedTask = taskRepository.save(task);
+
+            return Optional.of(TaskDTO.fromEntity(savedTask));
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
             return Optional.empty();
         }
-
-        // Get the project entity
-        Optional<Project> project = projectService.getById(taskDTO.getProjectId())
-                .map(ProjectDTO::toEntity);
-
-        if (project.isEmpty()) {
-            return Optional.empty();
-        }
-
-        // Get the assigned user entity if provided
-        User assignedUser = null;
-        if (taskDTO.getAssignedUserId() != null) {
-            assignedUser = userService.getUserById(taskDTO.getAssignedUserId())
-                    .map(UserDTO::toEntity)
-                    .orElse(null);
-        }
-
-        // Create and save the task
-        Task task = taskDTO.toEntity(project.get(), assignedUser);
-        Task savedTask = taskRepository.save(task);
-
-        return Optional.of(TaskDTO.fromEntity(savedTask));
     }
 
     // Read

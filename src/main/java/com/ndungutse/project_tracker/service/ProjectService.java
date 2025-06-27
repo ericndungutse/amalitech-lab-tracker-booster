@@ -20,8 +20,7 @@ public class ProjectService {
 
     public ProjectService(
             ProjectRepository projectRepository,
-            AuditService auditService
-    ) {
+            AuditService auditService) {
         this.projectRepository = projectRepository;
         this.auditService = auditService;
     }
@@ -49,8 +48,7 @@ public class ProjectService {
     // Read with pagination
     public Page<ProjectDTO> getAll(
             int page,
-            int size
-    ) {
+            int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Project> projectPage = projectRepository.findAll(pageable);
         return projectPage.map(ProjectDTO::fromEntity);
@@ -64,8 +62,7 @@ public class ProjectService {
     @Transactional
     public ProjectDTO update(
             Long id,
-            ProjectDTO updatedProjectDTO
-    ) {
+            ProjectDTO updatedProjectDTO) {
         Optional<Project> existingProject = projectRepository.findById(id);
         if (existingProject.isPresent()) {
             Project project = existingProject.get();
@@ -112,6 +109,6 @@ public class ProjectService {
     }
 
     public boolean exists(Long id) {
-        return !projectRepository.existsById(id);
+        return projectRepository.existsById(id);
     }
 }
