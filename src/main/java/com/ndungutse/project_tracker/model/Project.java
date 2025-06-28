@@ -29,9 +29,9 @@ public class Project {
     private LocalDate deadline;
     private boolean status;
 
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
-    @ToString.Exclude  // Prevent circular reference in toString()
-    @Builder.Default   // Use this default value when using the builder pattern
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @ToString.Exclude // Prevent circular reference in toString()
+    @Builder.Default // Use this default value when using the builder pattern
     private List<Task> tasks = new ArrayList<>();
 
     // Custom methods for managing bidirectional relationship

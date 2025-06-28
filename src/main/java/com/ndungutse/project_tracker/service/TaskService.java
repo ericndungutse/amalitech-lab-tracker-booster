@@ -70,8 +70,8 @@ public class TaskService {
     }
 
     public Optional<TaskDTO> getById(Long id) {
-        Optional<Task> taskOpt = taskRepository.findById(id);
-        return taskOpt.map(TaskDTO::fromEntity);
+        return Optional.ofNullable(taskRepository.findById(id).map(TaskDTO::fromEntity)
+                .orElseThrow(() -> new IllegalArgumentException("Task not found with id: " + id)));
     }
 
     // Get tasks by assigned user
@@ -81,8 +81,7 @@ public class TaskService {
             return List.of();
         }
 
-        List<Task> tasks = taskRepository.findByAssignedUserId(userId);
-        return tasks.stream()
+        return taskRepository.findByAssignedUserId(userId).stream()
                 .map(TaskDTO::fromEntity)
                 .collect(Collectors.toList());
     }
@@ -94,16 +93,14 @@ public class TaskService {
             return List.of();
         }
 
-        List<Task> tasks = taskRepository.findByProjectId(projectId);
-        return tasks.stream()
+        return taskRepository.findByProjectId(projectId).stream()
                 .map(TaskDTO::fromEntity)
                 .collect(Collectors.toList());
     }
 
     // Get tasks by status
     public List<TaskDTO> getTasksByStatus(boolean status) {
-        List<Task> tasks = taskRepository.findByStatus(status);
-        return tasks.stream()
+        return taskRepository.findByStatus(status).stream()
                 .map(TaskDTO::fromEntity)
                 .collect(Collectors.toList());
     }
@@ -155,8 +152,7 @@ public class TaskService {
             userOpt.ifPresent(existingTask::setAssignedUser);
         }
 
-        Task updatedTask = taskRepository.save(existingTask);
-        return Optional.of(TaskDTO.fromEntity(updatedTask));
+        return Optional.of(TaskDTO.fromEntity(taskRepository.save(existingTask)));
     }
 
     // Delete
@@ -170,8 +166,7 @@ public class TaskService {
 
     // Get overdue tasks
     public List<TaskDTO> getOverdueTasks() {
-        List<Task> tasks = taskRepository.findOverdueTasks(LocalDate.now());
-        return tasks.stream()
+        return taskRepository.findOverdueTasks(LocalDate.now()).stream()
                 .map(TaskDTO::fromEntity)
                 .collect(Collectors.toList());
     }

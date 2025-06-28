@@ -39,7 +39,7 @@ public class User {
     @ToString.Exclude
     private Role role;
 
-    @OneToMany(mappedBy = "assignedUser", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "assignedUser", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @ToString.Exclude
     @Builder.Default
     private List<Task> assignedTasks = new ArrayList<>();

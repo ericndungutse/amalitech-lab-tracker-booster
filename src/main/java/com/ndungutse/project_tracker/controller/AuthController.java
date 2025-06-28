@@ -1,23 +1,23 @@
 package com.ndungutse.project_tracker.controller;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.ndungutse.project_tracker.dto.LoginRequest;
 import com.ndungutse.project_tracker.dto.LoginResponse;
 import com.ndungutse.project_tracker.dto.RegisterRequest;
 import com.ndungutse.project_tracker.service.AuthService;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.web.bind.annotation.*;
-
-import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -54,9 +54,10 @@ public class AuthController {
 
     }
 
-//    @GetMapping("/oauth2/google/redirect")
-//    public String redirectToGoogle(HttpServletResponse response) throws IOException {
-//        System.out.println("redirectToGoogle");
-//        return "done";
-//    }
+    // @GetMapping("/oauth2/google/redirect")
+    // public String redirectToGoogle(HttpServletResponse response) throws
+    // IOException {
+    // System.out.println("redirectToGoogle");
+    // return "done";
+    // }
 }

@@ -1,5 +1,12 @@
 package com.ndungutse.project_tracker.service;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
 import com.ndungutse.project_tracker.dto.CreateUserRequest;
 import com.ndungutse.project_tracker.dto.UpdateUserRequest;
 import com.ndungutse.project_tracker.dto.UserDTO;
@@ -8,13 +15,8 @@ import com.ndungutse.project_tracker.model.Role;
 import com.ndungutse.project_tracker.model.User;
 import com.ndungutse.project_tracker.repository.RoleRepository;
 import com.ndungutse.project_tracker.repository.UserRepository;
-import jakarta.transaction.Transactional;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import jakarta.transaction.Transactional;
 
 @Service
 public class UserService {
@@ -59,8 +61,8 @@ public class UserService {
 
     // Get all users
     public List<UserDTO> getAllUsers() {
-        List<User> users = userRepository.findAll();
-        return users.stream()
+        // List<User> users = userRepository.findAll();
+        return userRepository.findAll().stream()
                 .map(UserDTO::fromEntity)
                 .collect(Collectors.toList());
     }
