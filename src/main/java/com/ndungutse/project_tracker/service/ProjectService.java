@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.ndungutse.project_tracker.dto.ProjectDTO;
 import com.ndungutse.project_tracker.dto.mapper.ProjectMapper;
 import com.ndungutse.project_tracker.dto.projection.ProjectIdNameStatusDto;
+import com.ndungutse.project_tracker.exception.ResourceNotFoundException;
 import com.ndungutse.project_tracker.model.Project;
 import com.ndungutse.project_tracker.repository.ProjectRepository;
 
@@ -59,43 +60,40 @@ public class ProjectService {
     }
 
     public Optional<ProjectDTO> getById(Long id) {
-        Optional<Project> projectOpt = projectRepository.findById(id);
-        return Optional.ofNullable(projectMapper.toDto(projectOpt.get()));
+        Project project = projectRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Project with ID " + id + " does not exist."));
+        return Optional.ofNullable(projectMapper.toDto(project));
     }
 
     @Transactional
     public ProjectDTO update(
             Long id,
             ProjectDTO updatedProjectDTO) {
-        Optional<Project> existingProject = projectRepository.findById(id);
+        Project existingProject = projectRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Project with ID " + id + " does not exist."));
 
-        if (existingProject.isPresent()) {
-            Project project = existingProject.get();
-
-            // Only update fields that are not null to leverage @DynamicUpdate
-            if (updatedProjectDTO.getName() != null) {
-                project.setName(updatedProjectDTO.getName());
-            }
-
-            if (updatedProjectDTO.getDescription() != null) {
-                project.setDescription(updatedProjectDTO.getDescription());
-            }
-
-            if (updatedProjectDTO.getDeadline() != null) {
-                project.setDeadline(updatedProjectDTO.getDeadline());
-            }
-
-            // Status is a primitive boolean, so we always update it
-            project.setStatus(updatedProjectDTO.isStatus());
-
-            ProjectDTO updatedDTO = projectMapper.toDto(project);
-
-            // Log the update action
-            auditService.logUpdateAction("Project", id, "dummy_user", updatedDTO);
-
-            return updatedDTO;
+        // Only update fields that are not null to leverage @DynamicUpdate
+        if (updatedProjectDTO.getName() != null) {
+            existingProject.setName(updatedProjectDTO.getName());
         }
-        return null;
+
+        if (updatedProjectDTO.getDescription() != null) {
+            existingProject.setDescription(updatedProjectDTO.getDescription());
+        }
+
+        if (updatedProjectDTO.getDeadline() != null) {
+            existingProject.setDeadline(updatedProjectDTO.getDeadline());
+        }
+
+        // Status is a primitive boolean, so we always update it
+        existingProject.setStatus(updatedProjectDTO.isStatus());
+
+        ProjectDTO updatedDTO = projectMapper.toDto(existingProject);
+
+        // Log the update action
+        auditService.logUpdateAction("Project", id, "dummy_user", updatedDTO);
+
+        return updatedDTO;
     }
 
     // project only id, name, and status
@@ -107,9 +105,8 @@ public class ProjectService {
 
     // Delete
     public void delete(Long id) {
-
         if (!exists(id)) {
-            throw new IllegalArgumentException("Project with ID " + id + " does not exist.");
+            throw new ResourceNotFoundException("Project with ID " + id + " does not exist.");
         }
 
         projectRepository.deleteById(id);
