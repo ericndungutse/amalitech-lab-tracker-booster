@@ -23,7 +23,7 @@ public class Role {
     @Column(unique = true, nullable = false)
     private String roleName;
 
-    @OneToMany(mappedBy = "role")
+    @OneToMany(mappedBy = "role", fetch = FetchType.LAZY)
     @Builder.Default
     private List<User> users = new ArrayList<>();
 }
