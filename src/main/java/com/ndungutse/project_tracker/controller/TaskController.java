@@ -67,9 +67,8 @@ public class TaskController {
         @GetMapping("/summary/{taskId}")
         public ResponseEntity<TaskSummaryDTO> getTaskSummaryById(
                         @Parameter(description = "ID of the task to retrieve", required = true) @PathVariable Long taskId) {
-                Optional<TaskSummaryDTO> taskSummary = taskService.getTaskSummaryById(taskId);
-                return taskSummary.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
-                                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+                TaskSummaryDTO taskSummary = taskService.getTaskSummaryById(taskId);
+                return new ResponseEntity<>(taskSummary, HttpStatus.OK);
         }
 
         // Get all tasks
@@ -164,9 +163,7 @@ public class TaskController {
         @DeleteMapping("/{id}")
         public ResponseEntity<Void> deleteTask(
                         @Parameter(description = "ID of the task to delete", required = true) @PathVariable Long id) {
-                if (!taskService.exists(id)) {
-                        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-                }
+
                 taskService.delete(id);
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }

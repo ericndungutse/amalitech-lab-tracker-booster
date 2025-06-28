@@ -11,6 +11,7 @@ import com.ndungutse.project_tracker.dto.TaskSummaryDTO;
 import com.ndungutse.project_tracker.dto.UserDTO;
 import com.ndungutse.project_tracker.dto.mapper.ProjectMapper;
 import com.ndungutse.project_tracker.dto.mapper.TaskMapper;
+import com.ndungutse.project_tracker.exception.ResourceNotFoundException;
 import com.ndungutse.project_tracker.model.Project;
 import com.ndungutse.project_tracker.model.Task;
 import com.ndungutse.project_tracker.model.User;
@@ -40,8 +41,9 @@ public class TaskService {
     }
 
     // Task Summery
-    public Optional<TaskSummaryDTO> getTaskSummaryById(Long taskId) {
-        return Optional.ofNullable(taskRepository.findTaskSummaryDTOById(taskId));
+    public TaskSummaryDTO getTaskSummaryById(Long taskId) {
+        return Optional.ofNullable(taskRepository.findTaskSummaryDTOById(taskId))
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + taskId));
     }
 
     // Create
@@ -78,7 +80,7 @@ public class TaskService {
 
     public Optional<TaskDTO> getById(Long id) {
         Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Task not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + id));
 
         return Optional.of(taskMapper.toDto(task));
     }
@@ -87,7 +89,7 @@ public class TaskService {
     public List<TaskDTO> getTasksByUser(Long userId) {
         // First verify that the user exists
         if (!userService.exists(userId)) {
-            return List.of();
+            throw new ResourceNotFoundException("User not found with id: " + userId);
         }
 
         return taskMapper.toDtoList(taskRepository.findByAssignedUserId(userId));
@@ -97,7 +99,7 @@ public class TaskService {
     public List<TaskDTO> getTasksByProject(Long projectId) {
         // First verify that the project exists
         if (!projectService.exists(projectId)) {
-            return List.of();
+            throw new ResourceNotFoundException("Project not found with id: " + projectId);
         }
 
         return taskMapper.toDtoList(taskRepository.findByProjectId(projectId));
@@ -113,13 +115,8 @@ public class TaskService {
     public Optional<TaskDTO> update(
             Long id,
             TaskDTO updatedTaskDTO) {
-        Optional<Task> existingTaskOpt = taskRepository.findById(id);
-
-        if (existingTaskOpt.isEmpty()) {
-            return Optional.empty();
-        }
-
-        Task existingTask = existingTaskOpt.get();
+        Task existingTask = taskRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Task with ID " + id + " does not exist."));
 
         // Update fields that are not null
         if (updatedTaskDTO.getTitle() != null) {
@@ -160,6 +157,9 @@ public class TaskService {
 
     // Delete
     public void delete(Long id) {
+        if (!taskRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Task with ID " + id + " does not exist.");
+        }
         taskRepository.deleteById(id);
     }
 
