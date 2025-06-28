@@ -34,7 +34,4 @@ public class Task {
     @JoinColumn(name = "assigned_user_id")
     @ToString.Exclude
     private User assignedUser;
-
-    @Column(name = "assigned_user_id", insertable = false, updatable = false)
-    private Long assignedUserId;
 }

@@ -11,13 +11,15 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class TaskDTO {
-    private Long id;
+public class TaskSummaryDTO {
     private String title;
-    private String description;
     private boolean status;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate dueDate;
-    private Long projectId;
-    private Long userId;
+
+    public TaskSummaryDTO(String title, boolean status, LocalDate dueDate) {
+        this.title = title;
+        this.status = status;
+        this.dueDate = dueDate;
+    }
 }

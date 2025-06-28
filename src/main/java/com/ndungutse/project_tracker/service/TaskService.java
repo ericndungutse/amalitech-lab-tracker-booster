@@ -1,77 +1,86 @@
 package com.ndungutse.project_tracker.service;
 
-import com.ndungutse.project_tracker.dto.ProjectDTO;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+
 import com.ndungutse.project_tracker.dto.TaskDTO;
+import com.ndungutse.project_tracker.dto.TaskSummaryDTO;
 import com.ndungutse.project_tracker.dto.UserDTO;
+import com.ndungutse.project_tracker.dto.mapper.ProjectMapper;
+import com.ndungutse.project_tracker.dto.mapper.TaskMapper;
 import com.ndungutse.project_tracker.model.Project;
 import com.ndungutse.project_tracker.model.Task;
 import com.ndungutse.project_tracker.model.User;
 import com.ndungutse.project_tracker.repository.TaskRepository;
-import jakarta.transaction.Transactional;
-import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import jakarta.transaction.Transactional;
 
 @Service
 public class TaskService {
     private final TaskRepository taskRepository;
     private final ProjectService projectService;
     private final UserService userService;
+    private final TaskMapper taskMapper;
+    private final ProjectMapper projectMapper;
 
     public TaskService(
             TaskRepository taskRepository,
             ProjectService projectService,
-            UserService userService) {
+            UserService userService,
+            TaskMapper taskMapper,
+            ProjectMapper projectMapper) {
         this.taskRepository = taskRepository;
         this.projectService = projectService;
         this.userService = userService;
+        this.taskMapper = taskMapper;
+        this.projectMapper = projectMapper;
+    }
+
+    // Task Summery
+    public Optional<TaskSummaryDTO> getTaskSummaryById(Long taskId) {
+        return Optional.ofNullable(taskRepository.findTaskSummaryDTOById(taskId));
     }
 
     // Create
     @Transactional
     public Optional<TaskDTO> create(TaskDTO taskDTO) {
-        // Validate that the project exists
-        if (taskDTO.getProjectId() == null || !projectService.exists(taskDTO.getProjectId())) {
-            return Optional.empty();
-        }
+
+        // Create and save the task
+        Task newTask = taskMapper.toEntity(taskDTO);
 
         // Get the project entity
-        Optional<Project> project = projectService.getById(taskDTO.getProjectId())
-                .map(ProjectDTO::toEntity);
-
-        if (project.isEmpty()) {
-            return Optional.empty();
-        }
+        Project project = projectMapper.toEntity(projectService.getById(taskDTO.getProjectId()).get());
 
         // Get the assigned user entity if provided
         User assignedUser = null;
-        if (taskDTO.getAssignedUserId() != null) {
-            assignedUser = userService.getUserById(taskDTO.getAssignedUserId())
-                    .map(UserDTO::toEntity)
-                    .orElse(null);
+        if (taskDTO.getUserId() != null && userService.exists(taskDTO.getUserId())) {
+            assignedUser = userService.getUserById(taskDTO.getUserId()).get().toEntity();
+            newTask.setAssignedUser(assignedUser);
         }
 
-        // Create and save the task
-        Task task = taskDTO.toEntity(project.get(), assignedUser);
-        Task savedTask = taskRepository.save(task);
+        if (project != null) {
+            newTask.setProject(project);
+        }
 
-        return Optional.of(TaskDTO.fromEntity(savedTask));
+        newTask.setAssignedUser(assignedUser);
+        Task savedTask = taskRepository.save(newTask);
+
+        return Optional.of(taskMapper.toDto(savedTask));
     }
 
     // Read
     public List<TaskDTO> getAll() {
-        List<Task> tasks = taskRepository.findAll();
-        return tasks.stream()
-                .map(TaskDTO::fromEntity)
-                .collect(Collectors.toList());
+        return taskMapper.toDtoList(taskRepository.findAll());
     }
 
     public Optional<TaskDTO> getById(Long id) {
-        return Optional.ofNullable(taskRepository.findById(id).map(TaskDTO::fromEntity)
-                .orElseThrow(() -> new IllegalArgumentException("Task not found with id: " + id)));
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Task not found with id: " + id));
+
+        return Optional.of(taskMapper.toDto(task));
     }
 
     // Get tasks by assigned user
@@ -81,9 +90,7 @@ public class TaskService {
             return List.of();
         }
 
-        return taskRepository.findByAssignedUserId(userId).stream()
-                .map(TaskDTO::fromEntity)
-                .collect(Collectors.toList());
+        return taskMapper.toDtoList(taskRepository.findByAssignedUserId(userId));
     }
 
     // Get tasks by project
@@ -93,16 +100,12 @@ public class TaskService {
             return List.of();
         }
 
-        return taskRepository.findByProjectId(projectId).stream()
-                .map(TaskDTO::fromEntity)
-                .collect(Collectors.toList());
+        return taskMapper.toDtoList(taskRepository.findByProjectId(projectId));
     }
 
     // Get tasks by status
     public List<TaskDTO> getTasksByStatus(boolean status) {
-        return taskRepository.findByStatus(status).stream()
-                .map(TaskDTO::fromEntity)
-                .collect(Collectors.toList());
+        return taskMapper.toDtoList(taskRepository.findByStatus(status));
     }
 
     // Update
@@ -138,21 +141,21 @@ public class TaskService {
         if (updatedTaskDTO.getProjectId() != null &&
                 projectService.exists(updatedTaskDTO.getProjectId())) {
 
-            Optional<Project> projectOpt = projectService.getById(updatedTaskDTO.getProjectId())
-                    .map(ProjectDTO::toEntity);
+            Optional<Project> projectOpt = Optional.ofNullable(projectMapper
+                    .toEntity(projectService.getById(updatedTaskDTO.getProjectId()).get()));
 
             projectOpt.ifPresent(existingTask::setProject);
         }
 
         // Update assigned user if provided and exists
-        if (updatedTaskDTO.getAssignedUserId() != null) {
-            Optional<User> userOpt = userService.getUserById(updatedTaskDTO.getAssignedUserId())
+        if (updatedTaskDTO.getUserId() != null) {
+            Optional<User> userOpt = userService.getUserById(updatedTaskDTO.getUserId())
                     .map(UserDTO::toEntity);
 
             userOpt.ifPresent(existingTask::setAssignedUser);
         }
 
-        return Optional.of(TaskDTO.fromEntity(taskRepository.save(existingTask)));
+        return Optional.of(taskMapper.toDto(taskRepository.save(existingTask)));
     }
 
     // Delete
@@ -166,8 +169,6 @@ public class TaskService {
 
     // Get overdue tasks
     public List<TaskDTO> getOverdueTasks() {
-        return taskRepository.findOverdueTasks(LocalDate.now()).stream()
-                .map(TaskDTO::fromEntity)
-                .collect(Collectors.toList());
+        return taskMapper.toDtoList(taskRepository.findOverdueTasks(LocalDate.now()));
     }
 }
