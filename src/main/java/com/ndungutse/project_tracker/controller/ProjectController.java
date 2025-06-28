@@ -69,9 +69,8 @@ public class ProjectController {
         @GetMapping("/{id}")
         public ResponseEntity<ProjectDTO> getProjectById(
                         @Parameter(description = "ID of the project to retrieve", required = true) @PathVariable Long id) {
-                Optional<ProjectDTO> project = projectService.getById(id);
-                return project.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
-                                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+                ProjectDTO project = projectService.getById(id);
+                return new ResponseEntity<>(project, HttpStatus.OK);
         }
 
         // Update a project

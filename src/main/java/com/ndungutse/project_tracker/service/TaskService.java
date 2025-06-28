@@ -54,7 +54,7 @@ public class TaskService {
         Task newTask = taskMapper.toEntity(taskDTO);
 
         // Get the project entity
-        Project project = projectMapper.toEntity(projectService.getById(taskDTO.getProjectId()).get());
+        Project project = projectMapper.toEntity(projectService.getById(taskDTO.getProjectId()));
 
         // Get the assigned user entity if provided
         User assignedUser = null;
@@ -139,7 +139,7 @@ public class TaskService {
                 projectService.exists(updatedTaskDTO.getProjectId())) {
 
             Optional<Project> projectOpt = Optional.ofNullable(projectMapper
-                    .toEntity(projectService.getById(updatedTaskDTO.getProjectId()).get()));
+                    .toEntity(projectService.getById(updatedTaskDTO.getProjectId())));
 
             projectOpt.ifPresent(existingTask::setProject);
         }
