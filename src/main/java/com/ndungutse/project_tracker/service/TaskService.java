@@ -1,6 +1,11 @@
 package com.ndungutse.project_tracker.service;
 
-import com.ndungutse.project_tracker.dto.ProjectDTO;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+
 import com.ndungutse.project_tracker.dto.TaskDTO;
 import com.ndungutse.project_tracker.dto.UserDTO;
 import com.ndungutse.project_tracker.dto.mapper.ProjectMapper;
@@ -9,13 +14,8 @@ import com.ndungutse.project_tracker.model.Project;
 import com.ndungutse.project_tracker.model.Task;
 import com.ndungutse.project_tracker.model.User;
 import com.ndungutse.project_tracker.repository.TaskRepository;
-import jakarta.transaction.Transactional;
-import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import jakarta.transaction.Transactional;
 
 @Service
 public class TaskService {

@@ -2,7 +2,6 @@ package com.ndungutse.project_tracker.service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -11,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.ndungutse.project_tracker.dto.ProjectDTO;
 import com.ndungutse.project_tracker.dto.mapper.ProjectMapper;
+import com.ndungutse.project_tracker.dto.projection.ProjectIdNameStatusDto;
 import com.ndungutse.project_tracker.model.Project;
 import com.ndungutse.project_tracker.repository.ProjectRepository;
 
@@ -68,8 +68,7 @@ public class ProjectService {
             Long id,
             ProjectDTO updatedProjectDTO) {
         Optional<Project> existingProject = projectRepository.findById(id);
-        System.out.println("******************* Not Found Project with ID: " + id + " *******************" + " "
-                + existingProject);
+
         if (existingProject.isPresent()) {
             Project project = existingProject.get();
 
@@ -97,6 +96,13 @@ public class ProjectService {
             return updatedDTO;
         }
         return null;
+    }
+
+    // project only id, name, and status
+    public Page<ProjectIdNameStatusDto> getAllIdNameStatus(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<ProjectIdNameStatusDto> projectPage = projectRepository.findAllBy(pageable);
+        return projectPage;
     }
 
     // Delete
