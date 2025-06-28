@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import com.ndungutse.project_tracker.dto.TaskDTO;
+import com.ndungutse.project_tracker.dto.TaskSummaryDTO;
 import com.ndungutse.project_tracker.dto.UserDTO;
 import com.ndungutse.project_tracker.dto.mapper.ProjectMapper;
 import com.ndungutse.project_tracker.dto.mapper.TaskMapper;
@@ -38,11 +39,14 @@ public class TaskService {
         this.projectMapper = projectMapper;
     }
 
+    // Task Summery
+    public Optional<TaskSummaryDTO> getTaskSummaryById(Long taskId) {
+        return Optional.ofNullable(taskRepository.findTaskSummaryDTOById(taskId));
+    }
+
     // Create
     @Transactional
     public Optional<TaskDTO> create(TaskDTO taskDTO) {
-
-        System.out.println("**************************" + taskDTO.getUserId() + "**************************");
 
         // Create and save the task
         Task newTask = taskMapper.toEntity(taskDTO);

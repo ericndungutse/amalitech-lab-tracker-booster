@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ndungutse.project_tracker.dto.TaskDTO;
+import com.ndungutse.project_tracker.dto.TaskSummaryDTO;
 import com.ndungutse.project_tracker.security.SecurityUtil;
 import com.ndungutse.project_tracker.service.TaskService;
 
@@ -55,6 +56,20 @@ public class TaskController {
                 return createdTask.map(value -> new ResponseEntity<>(value,
                                 HttpStatus.CREATED))
                                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.BAD_REQUEST));
+        }
+
+        // Get Task Summary by ID
+        @Operation(summary = "Get task summary by ID", description = "Returns a summary of a task based on the provided ID")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Successfully retrieved task summary", content = @Content(mediaType = "application/json", schema = @Schema(implementation = TaskSummaryDTO.class))),
+                        @ApiResponse(responseCode = "404", description = "Task not found", content = @Content)
+        })
+        @GetMapping("/summary/{taskId}")
+        public ResponseEntity<TaskSummaryDTO> getTaskSummaryById(
+                        @Parameter(description = "ID of the task to retrieve", required = true) @PathVariable Long taskId) {
+                Optional<TaskSummaryDTO> taskSummary = taskService.getTaskSummaryById(taskId);
+                return taskSummary.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
+                                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
         }
 
         // Get all tasks
