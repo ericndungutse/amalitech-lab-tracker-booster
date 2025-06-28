@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.ndungutse.project_tracker.dto.ProjectDTO;
+import com.ndungutse.project_tracker.dto.mapper.ProjectMapper;
 import com.ndungutse.project_tracker.model.Project;
 import com.ndungutse.project_tracker.repository.ProjectRepository;
 
@@ -19,19 +20,22 @@ import jakarta.transaction.Transactional;
 public class ProjectService {
     private final ProjectRepository projectRepository;
     private final AuditService auditService;
+    ProjectMapper projectMapper;
 
     public ProjectService(
             ProjectRepository projectRepository,
-            AuditService auditService) {
+            AuditService auditService,
+            ProjectMapper projectMapper) {
         this.projectRepository = projectRepository;
         this.auditService = auditService;
+        this.projectMapper = projectMapper;
     }
 
     // Create
     public ProjectDTO create(ProjectDTO projectDTO) {
-        Project project = projectDTO.toEntity();
+        Project project = projectMapper.toEntity(projectDTO);
         Project savedProject = projectRepository.save(project);
-        ProjectDTO savedProjectDTO = ProjectDTO.fromEntity(savedProject);
+        ProjectDTO savedProjectDTO = projectMapper.toDto(savedProject);
 
         // Log the create action
         auditService.logCreateAction("Project", savedProject.getId(), "dummy_user", savedProjectDTO);
@@ -42,9 +46,7 @@ public class ProjectService {
     // Read
     public List<ProjectDTO> getAll() {
         List<Project> projects = projectRepository.findAll();
-        return projects.stream()
-                .map(ProjectDTO::fromEntity)
-                .collect(Collectors.toList());
+        return projectMapper.toDtoList(projects);
     }
 
     // Read with pagination
@@ -53,12 +55,12 @@ public class ProjectService {
             int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Project> projectPage = projectRepository.findAll(pageable);
-        return projectPage.map(ProjectDTO::fromEntity);
+        return projectMapper.toPageDto(projectPage);
     }
 
     public Optional<ProjectDTO> getById(Long id) {
         Optional<Project> projectOpt = projectRepository.findById(id);
-        return projectOpt.map(ProjectDTO::fromEntity);
+        return Optional.ofNullable(projectMapper.toDto(projectOpt.get()));
     }
 
     @Transactional
@@ -85,7 +87,7 @@ public class ProjectService {
             // Status is a primitive boolean, so we always update it
             project.setStatus(updatedProjectDTO.isStatus());
 
-            ProjectDTO updatedDTO = ProjectDTO.fromEntity(project);
+            ProjectDTO updatedDTO = projectMapper.toDto(project);
 
             // Log the update action
             auditService.logUpdateAction("Project", id, "dummy_user", updatedDTO);
@@ -100,7 +102,7 @@ public class ProjectService {
         // Get the project before deleting it to log its data
         Optional<Project> projectOpt = projectRepository.findById(id);
         if (projectOpt.isPresent()) {
-            ProjectDTO projectDTO = ProjectDTO.fromEntity(projectOpt.get());
+            ProjectDTO projectDTO = projectMapper.toDto(projectOpt.get());
             projectRepository.deleteById(id);
 
             // Log the delete action
