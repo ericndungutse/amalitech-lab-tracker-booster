@@ -1,17 +1,19 @@
 package com.ndungutse.project_tracker.service;
 
-import com.ndungutse.project_tracker.dto.ProjectDTO;
-import com.ndungutse.project_tracker.model.Project;
-import com.ndungutse.project_tracker.repository.ProjectRepository;
-import jakarta.transaction.Transactional;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import com.ndungutse.project_tracker.dto.ProjectDTO;
+import com.ndungutse.project_tracker.model.Project;
+import com.ndungutse.project_tracker.repository.ProjectRepository;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class ProjectService {
@@ -20,8 +22,7 @@ public class ProjectService {
 
     public ProjectService(
             ProjectRepository projectRepository,
-            AuditService auditService
-    ) {
+            AuditService auditService) {
         this.projectRepository = projectRepository;
         this.auditService = auditService;
     }
@@ -49,8 +50,7 @@ public class ProjectService {
     // Read with pagination
     public Page<ProjectDTO> getAll(
             int page,
-            int size
-    ) {
+            int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Project> projectPage = projectRepository.findAll(pageable);
         return projectPage.map(ProjectDTO::fromEntity);
@@ -64,8 +64,7 @@ public class ProjectService {
     @Transactional
     public ProjectDTO update(
             Long id,
-            ProjectDTO updatedProjectDTO
-    ) {
+            ProjectDTO updatedProjectDTO) {
         Optional<Project> existingProject = projectRepository.findById(id);
         if (existingProject.isPresent()) {
             Project project = existingProject.get();
@@ -106,12 +105,10 @@ public class ProjectService {
 
             // Log the delete action
             auditService.logDeleteAction("Project", id, "dummy_user", projectDTO);
-        } else {
-            projectRepository.deleteById(id);
         }
     }
 
     public boolean exists(Long id) {
-        return !projectRepository.existsById(id);
+        return projectRepository.existsById(id);
     }
 }
