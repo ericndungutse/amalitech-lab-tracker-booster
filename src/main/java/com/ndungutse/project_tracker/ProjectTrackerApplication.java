@@ -30,6 +30,7 @@ public class ProjectTrackerApplication {
     }
 
     public static void main(String[] args) {
+        // Disable for testing caching
         System.setProperty("spring.devtools.restart.enabled", "false");
         SpringApplication.run(ProjectTrackerApplication.class, args);
     }

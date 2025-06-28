@@ -57,6 +57,7 @@ public class ProjectService {
     public Page<ProjectDTO> getAll(
             int page,
             int size) {
+
         Pageable pageable = PageRequest.of(page, size);
         Page<Project> projectPage = projectRepository.findAll(pageable);
         return projectMapper.toPageDto(projectPage);
