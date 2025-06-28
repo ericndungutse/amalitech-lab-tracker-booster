@@ -88,10 +88,6 @@ public class ProjectController {
                         @Parameter(description = "ID of the project to update", required = true) @PathVariable Long id,
                         @Parameter(description = "Updated project data", required = true) @RequestBody ProjectDTO projectDTO) {
 
-                if (!projectService.exists(id)) {
-                        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-                }
-
                 ProjectDTO updatedProject = projectService.update(id, projectDTO);
                 return new ResponseEntity<>(updatedProject, HttpStatus.OK);
         }
