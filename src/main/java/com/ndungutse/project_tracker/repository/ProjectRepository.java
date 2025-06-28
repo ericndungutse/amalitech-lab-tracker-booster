@@ -1,11 +1,11 @@
 package com.ndungutse.project_tracker.repository;
 
-import com.ndungutse.project_tracker.dto.projection.ProjectIdNameStatusDto;
-import com.ndungutse.project_tracker.model.Project;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
+import com.ndungutse.project_tracker.dto.projection.ProjectIdNameStatusDto;
+import com.ndungutse.project_tracker.model.Project;
 
 @Repository
 public interface ProjectRepository extends JpaRepository<Project, Long> {

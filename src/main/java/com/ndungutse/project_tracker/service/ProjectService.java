@@ -1,8 +1,10 @@
 package com.ndungutse.project_tracker.service;
 
 import java.util.List;
-import java.util.Optional;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -51,6 +53,7 @@ public class ProjectService {
     }
 
     // Read with pagination
+    @Cacheable(value = "projects", key = "#page + '-' + #size")
     public Page<ProjectDTO> getAll(
             int page,
             int size) {
@@ -59,13 +62,15 @@ public class ProjectService {
         return projectMapper.toPageDto(projectPage);
     }
 
-    public Optional<ProjectDTO> getById(Long id) {
+    @Cacheable(value = "projectById", key = "#id")
+    public ProjectDTO getById(Long id) {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Project with ID " + id + " does not exist."));
-        return Optional.ofNullable(projectMapper.toDto(project));
+        return projectMapper.toDto(project);
     }
 
     @Transactional
+    @CachePut(value = "projectById", key = "#id")
     public ProjectDTO update(
             Long id,
             ProjectDTO updatedProjectDTO) {
@@ -104,6 +109,7 @@ public class ProjectService {
     }
 
     // Delete
+    @CacheEvict(value = "projectById", key = "#id")
     public void delete(Long id) {
         if (!exists(id)) {
             throw new ResourceNotFoundException("Project with ID " + id + " does not exist.");
