@@ -1,6 +1,7 @@
 package com.ndungutse.project_tracker.controller;
 
 import com.ndungutse.project_tracker.dto.TaskDTO;
+import com.ndungutse.project_tracker.model.Task;
 import com.ndungutse.project_tracker.service.TaskService;
 import com.ndungutse.project_tracker.security.SecurityUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -40,8 +41,11 @@ public class TaskController {
         @PostMapping
         public ResponseEntity<TaskDTO> createTask(
                         @Parameter(description = "Task data to create", required = true) @Valid @RequestBody TaskDTO taskDTO) {
+
                 Optional<TaskDTO> createdTask = taskService.create(taskDTO);
-                return createdTask.map(value -> new ResponseEntity<>(value, HttpStatus.CREATED))
+
+                return createdTask.map(value -> new ResponseEntity<>(value,
+                                HttpStatus.CREATED))
                                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.BAD_REQUEST));
         }
 

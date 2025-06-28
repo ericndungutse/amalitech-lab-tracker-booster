@@ -86,7 +86,8 @@ public class ProjectController {
     public ResponseEntity<ProjectDTO> updateProject(
             @Parameter(description = "ID of the project to update", required = true) @PathVariable Long id,
             @Parameter(description = "Updated project data", required = true) @RequestBody ProjectDTO projectDTO) {
-        if (projectService.exists(id)) {
+
+        if (!projectService.exists(id)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
@@ -105,9 +106,6 @@ public class ProjectController {
     @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     public ResponseEntity<Void> deleteProject(
             @Parameter(description = "ID of the project to delete", required = true) @PathVariable Long id) {
-        if (projectService.exists(id)) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
 
         projectService.delete(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

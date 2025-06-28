@@ -68,6 +68,8 @@ public class ProjectService {
             Long id,
             ProjectDTO updatedProjectDTO) {
         Optional<Project> existingProject = projectRepository.findById(id);
+        System.out.println("******************* Not Found Project with ID: " + id + " *******************" + " "
+                + existingProject);
         if (existingProject.isPresent()) {
             Project project = existingProject.get();
 
@@ -99,15 +101,12 @@ public class ProjectService {
 
     // Delete
     public void delete(Long id) {
-        // Get the project before deleting it to log its data
-        Optional<Project> projectOpt = projectRepository.findById(id);
-        if (projectOpt.isPresent()) {
-            ProjectDTO projectDTO = projectMapper.toDto(projectOpt.get());
-            projectRepository.deleteById(id);
 
-            // Log the delete action
-            auditService.logDeleteAction("Project", id, "dummy_user", projectDTO);
+        if (!exists(id)) {
+            throw new IllegalArgumentException("Project with ID " + id + " does not exist.");
         }
+
+        projectRepository.deleteById(id);
     }
 
     public boolean exists(Long id) {
