@@ -354,3 +354,19 @@ mvn test -Dtest=ProjectServiceTest
    ```bash
    java -jar target/project-tracker-1.0.0.jar
    ```
+
+## Performance Comparison
+
+### Brefore Optimization
+![Screenshot 2025-06-29 235758](https://github.com/user-attachments/assets/eca69e1e-8b90-4240-a36e-6baa0b956ac9)
+
+![Screenshot 2025-06-29 235810](https://github.com/user-attachments/assets/e15b90c0-86ed-4e42-96d8-5d7ab0c89966)
+
+### Aftern Optimization
+
+![Perofce After](https://github.com/user-attachments/assets/56d57301-cb29-44bb-a725-264ed5234032)
+
+
+![Usage After](https://github.com/user-attachments/assets/1f06283d-ab68-43d3-a4f8-62975a2e3522)
+
+
