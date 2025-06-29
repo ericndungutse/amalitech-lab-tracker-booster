@@ -17,6 +17,8 @@ import com.ndungutse.project_tracker.model.Task;
 import com.ndungutse.project_tracker.model.User;
 import com.ndungutse.project_tracker.repository.TaskRepository;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -26,21 +28,27 @@ public class TaskService {
     private final UserService userService;
     private final TaskMapper taskMapper;
     private final ProjectMapper projectMapper;
+    private final Counter tasksProcessedCounter;
 
     public TaskService(
             TaskRepository taskRepository,
             ProjectService projectService,
             UserService userService,
             TaskMapper taskMapper,
+            MeterRegistry meterRegistry,
             ProjectMapper projectMapper) {
         this.taskRepository = taskRepository;
         this.projectService = projectService;
         this.userService = userService;
         this.taskMapper = taskMapper;
         this.projectMapper = projectMapper;
+        // Create a counter named "tasks.processed"
+        this.tasksProcessedCounter = Counter.builder("tasks.processed")
+                .description("Number of tasks processed")
+                .register(meterRegistry);
     }
 
-    // Task Summery
+    // Task Summary
     public TaskSummaryDTO getTaskSummaryById(Long taskId) {
         return Optional.ofNullable(taskRepository.findTaskSummaryDTOById(taskId))
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + taskId));
@@ -49,6 +57,7 @@ public class TaskService {
     // Create
     @Transactional
     public Optional<TaskDTO> create(TaskDTO taskDTO) {
+        tasksProcessedCounter.increment();
 
         // Create and save the task
         Task newTask = taskMapper.toEntity(taskDTO);
@@ -75,6 +84,7 @@ public class TaskService {
 
     // Read
     public List<TaskDTO> getAll() {
+        tasksProcessedCounter.increment();
         return taskMapper.toDtoList(taskRepository.findAll());
     }
 
